@@ -1,0 +1,52 @@
+{
+  "hooks": [
+    {
+      "name": "track-learning-progress",
+      "event": "on-command",
+      "trigger": ["/assess", "/learn"],
+      "description": "Track learning progress and suggest next steps",
+      "enabled": true
+    },
+    {
+      "name": "personalize-recommendations",
+      "event": "on-agent-invoke",
+      "description": "Provide personalized resource recommendations based on user history",
+      "enabled": true
+    },
+    {
+      "name": "roadmap-navigation",
+      "event": "on-command",
+      "trigger": "/browse",
+      "description": "Help users navigate and understand roadmap structure",
+      "enabled": true
+    },
+    {
+      "name": "skill-assessment",
+      "event": "on-command",
+      "trigger": "/assess",
+      "description": "Evaluate skills and identify gaps",
+      "enabled": true
+    },
+    {
+      "name": "learning-reminder",
+      "event": "on-schedule",
+      "schedule": "daily",
+      "description": "Daily reminders to continue learning",
+      "enabled": false
+    }
+  ],
+  "notifications": {
+    "enabled": true,
+    "types": ["inline", "optional-email"]
+  },
+  "tracking": {
+    "track_progress": true,
+    "track_time_spent": true,
+    "respect_privacy": true
+  },
+  "personalization": {
+    "adaptive_difficulty": true,
+    "learning_style_detection": true,
+    "recommendation_engine": true
+  }
+}

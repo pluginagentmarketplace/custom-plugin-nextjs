@@ -1,0 +1,229 @@
+{
+  "name": "custom-plugin-nextjs",
+  "displayName": "Developer Roadmap Plugin",
+  "version": "1.0.0",
+  "description": "Complete learning system for all 80 developer career paths with AI-powered guidance, 7 specialist agents, and comprehensive skill modules",
+  "author": "Developer Roadmap Community",
+  "repository": "https://github.com/kamranahmedse/developer-roadmap",
+  "documentationUrl": "https://roadmap.sh",
+  "license": "MIT",
+  "keywords": [
+    "developer-learning",
+    "career-paths",
+    "roadmap",
+    "ai-coaching",
+    "skill-development",
+    "technology-learning"
+  ],
+  "agents": [
+    {
+      "name": "frontend-ui-developer",
+      "id": "agent-frontend",
+      "displayName": "Frontend & UI Developer Agent",
+      "description": "Expert in modern web frontend, UI/UX design, and web standards. Covers HTML, CSS, JavaScript, React, Vue, Angular, and design systems"
+    },
+    {
+      "name": "backend-server-developer",
+      "id": "agent-backend",
+      "displayName": "Backend & Server Developer Agent",
+      "description": "Specialist in server-side development, APIs, databases, and backend frameworks. Covers Node.js, PHP, Java, Laravel, Spring Boot, and more"
+    },
+    {
+      "name": "mobile-developer",
+      "id": "agent-mobile",
+      "displayName": "Mobile Developer Agent",
+      "description": "Expert in native and cross-platform mobile development. Covers iOS, Android, React Native, Flutter, and game development"
+    },
+    {
+      "name": "data-ai-engineer",
+      "id": "agent-data-ai",
+      "displayName": "Data & AI Engineer Agent",
+      "description": "Specialist in data engineering, machine learning, AI, and LLMs. Covers Python, ML frameworks, MLOps, and AI engineering"
+    },
+    {
+      "name": "devops-cloud-engineer",
+      "id": "agent-devops",
+      "displayName": "DevOps & Cloud Engineer Agent",
+      "description": "Expert in cloud platforms, containerization, infrastructure, and deployment. Covers AWS, Kubernetes, Docker, and DevOps practices"
+    },
+    {
+      "name": "system-architect",
+      "id": "agent-architect",
+      "displayName": "System Architect Agent",
+      "description": "Specialist in system design, architecture patterns, and computer science fundamentals. Covers design patterns, algorithms, and software architecture"
+    },
+    {
+      "name": "emerging-specializations",
+      "id": "agent-emerging",
+      "displayName": "Emerging Tech & Specialist Roles Agent",
+      "description": "Expert in emerging technologies, blockchain, security, QA, and specialized roles. Covers new tech, specialized domains, and career transitions"
+    }
+  ],
+  "commands": [
+    {
+      "name": "browse",
+      "id": "cmd-browse",
+      "displayName": "Browse Roadmaps",
+      "description": "Explore and discover any of the 80 developer roadmaps"
+    },
+    {
+      "name": "agents",
+      "id": "cmd-agents",
+      "displayName": "Find Agents",
+      "description": "Discover which specialist agent covers your interest area"
+    },
+    {
+      "name": "learn",
+      "id": "cmd-learn",
+      "displayName": "Start Learning",
+      "description": "Build a personalized learning path based on your goals"
+    },
+    {
+      "name": "assess",
+      "id": "cmd-assess",
+      "displayName": "Assessment",
+      "description": "Test your knowledge with interactive quizzes and challenges"
+    }
+  ],
+  "skills": [
+    {
+      "name": "frontend-skills",
+      "id": "skill-frontend",
+      "displayName": "Frontend Development",
+      "description": "Master HTML, CSS, JavaScript, React, Vue, Angular, and modern web technologies"
+    },
+    {
+      "name": "backend-skills",
+      "id": "skill-backend",
+      "displayName": "Backend Development",
+      "description": "Learn server-side development, APIs, databases, and backend frameworks"
+    },
+    {
+      "name": "mobile-skills",
+      "id": "skill-mobile",
+      "displayName": "Mobile Development",
+      "description": "Develop iOS, Android, React Native, Flutter, and cross-platform applications"
+    },
+    {
+      "name": "data-ai-skills",
+      "id": "skill-data-ai",
+      "displayName": "Data & AI Engineering",
+      "description": "Master data engineering, machine learning, MLOps, and AI technologies"
+    },
+    {
+      "name": "devops-cloud-skills",
+      "id": "skill-devops-cloud",
+      "displayName": "DevOps & Cloud",
+      "description": "Learn cloud platforms, containerization, infrastructure, and deployment"
+    },
+    {
+      "name": "architecture-skills",
+      "id": "skill-architecture",
+      "displayName": "System Design & Architecture",
+      "description": "Master system design, architecture patterns, and software design principles"
+    },
+    {
+      "name": "specialty-skills",
+      "id": "skill-specialty",
+      "displayName": "Specialty & Emerging Tech",
+      "description": "Explore blockchain, security, QA, and specialized technical roles"
+    }
+  ],
+  "roadmaps": {
+    "frontend": [
+      "frontend",
+      "html",
+      "css",
+      "javascript",
+      "react",
+      "vue",
+      "angular",
+      "nextjs",
+      "design-system",
+      "ux-design",
+      "code-review",
+      "prompt-engineering"
+    ],
+    "backend": [
+      "backend",
+      "nodejs",
+      "php",
+      "java",
+      "spring-boot",
+      "aspnet-core",
+      "laravel",
+      "golang",
+      "cpp",
+      "api-design",
+      "graphql",
+      "git-github",
+      "shell-bash"
+    ],
+    "mobile": [
+      "ios",
+      "android",
+      "react-native",
+      "flutter",
+      "swift-ui",
+      "game-developer"
+    ],
+    "data-ai": [
+      "python",
+      "data-engineer",
+      "data-analyst",
+      "machine-learning",
+      "mlops",
+      "ai-engineer",
+      "ai-data-scientist",
+      "ai-agents",
+      "ai-red-teaming",
+      "bi-analyst",
+      "sql"
+    ],
+    "devops-cloud": [
+      "devops",
+      "docker",
+      "kubernetes",
+      "terraform",
+      "aws",
+      "cloudflare",
+      "linux",
+      "mongodb",
+      "postgresql-dba",
+      "redis",
+      "server-side-game-developer",
+      "blockchain"
+    ],
+    "architecture": [
+      "system-design",
+      "software-architect",
+      "software-design-architecture",
+      "computer-science",
+      "datastructures-and-algorithms",
+      "cyber-security",
+      "qa",
+      "technical-writer",
+      "product-manager",
+      "engineering-manager",
+      "devrel",
+      "typescript",
+      "rust"
+    ],
+    "emerging": [
+      "kotlin",
+      "python",
+      "datastructures-and-algorithms",
+      "computer-science",
+      "bi-analyst"
+    ]
+  },
+  "roadmapCount": 80,
+  "agentCount": 7,
+  "skillCount": 7,
+  "commandCount": 4,
+  "totalContent": {
+    "hours": "1000+",
+    "codeExamples": "500+",
+    "projects": "100+"
+  }
+}
