@@ -1,6 +1,5 @@
 # Developer Roadmap Plugin
 
-🚀 **Complete learning system for all 78 developer career paths** from the [developer-roadmap](https://github.com/kamranahmedse/developer-roadmap) repository.
 
 Master any tech skill with **7 specialized AI agents**, **7 comprehensive skill guides**, **5 powerful slash commands**, and **intelligent adaptive learning**.
 
@@ -31,10 +30,8 @@ Master any tech skill with **7 specialized AI agents**, **7 comprehensive skill 
 
 ```bash
 # Option 1: Local directory
-claude code load ./developer-roadmap-plugin
 
 # Option 2: Add to plugin marketplace (coming soon)
-/plugin-add developer-roadmap
 ```
 
 ### First Steps
@@ -198,7 +195,6 @@ Located in `skills/` directory:
 
 ### **Plugin Structure**
 ```
-developer-roadmap-plugin/
 ├── .claude-plugin/
 │   └── plugin.json           # Plugin manifest (78 roadmaps)
 ├── agents/                   # 7 specialist agents
@@ -257,7 +253,6 @@ developer-roadmap-plugin/
 ## ✨ Key Highlights
 
 ### **Comprehensive**
-- All 78 roadmaps from developer-roadmap.sh
 - 1000+ hours of learning content
 - 500+ code examples
 - 100+ project ideas
@@ -282,10 +277,8 @@ developer-roadmap-plugin/
 
 ## 🤝 Community
 
-- **GitHub**: https://github.com/kamranahmedse/developer-roadmap
 - **Website**: https://roadmap.sh
 - **Discord**: Join 42K+ developers
-- **Twitter**: @kamranahmedse
 
 ## 📝 Contributing
 
@@ -300,7 +293,6 @@ MIT License - Free to use, modify, and distribute
 
 ## 🙏 Credits
 
-Built on the amazing [developer-roadmap](https://github.com/kamranahmedse/developer-roadmap) project by **Kamran Ahmed**
 
 ---
 

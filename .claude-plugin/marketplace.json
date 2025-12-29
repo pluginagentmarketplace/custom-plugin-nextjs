@@ -1,0 +1,15 @@
+{
+  "name": "pluginagentmarketplace-nextjs",
+  "owner": {
+    "name": "Plugin Agent Marketplace",
+    "email": "pluginagentmarketplace@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "custom-plugin-nextjs",
+      "source": "./",
+      "description": "Claude Code plugin for nextjs development",
+      "version": "1.0.0"
+    }
+  ]
+}

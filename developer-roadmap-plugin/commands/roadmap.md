@@ -1,6 +1,5 @@
 # /roadmap - Browse Developer Roadmaps
 
-Browse and explore any of the 78 developer roadmaps from the developer-roadmap.sh repository.
 
 ## Usage
 

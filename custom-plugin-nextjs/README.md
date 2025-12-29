@@ -1,6 +1,5 @@
 # Custom Plugin NextJS - Developer Roadmap
 
-🚀 **Complete learning system for all 80 developer roadmaps** from [developer-roadmap.sh](https://roadmap.sh)
 
 Ultrathink, net, kesin, detaylı, modern, robust plugin with **7 specialist AI agents**, **80 comprehensive roadmaps**, **7 skill modules**, and **4 powerful commands**.
 
@@ -215,7 +214,6 @@ MIT License - Free to use and modify
 
 ## 🙏 Credits
 
-Built on the amazing [developer-roadmap](https://github.com/kamranahmedse/developer-roadmap) project.
 
 ---
 

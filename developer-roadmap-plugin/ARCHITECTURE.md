@@ -4,7 +4,6 @@ Technical documentation for the Developer Roadmap Plugin.
 
 ## Overview
 
-This is a **comprehensive learning plugin** that brings all 78 developer roadmaps from [kamranahmedse/developer-roadmap](https://github.com/kamranahmedse/developer-roadmap) into Claude Code as an AI-powered learning system.
 
 ## System Design
 
@@ -66,7 +65,6 @@ This is a **comprehensive learning plugin** that brings all 78 developer roadmap
 ## File Structure
 
 ```
-developer-roadmap-plugin/
 │
 ├── .claude-plugin/
 │   └── plugin.json
@@ -588,13 +586,11 @@ Each SKILL.md (~10KB, 1000+ lines):
 ### **Local Installation**
 ```bash
 git clone <repo>
-cd developer-roadmap-plugin
 # Claude Code automatically loads from .claude-plugin/plugin.json
 ```
 
 ### **Plugin Marketplace** (future)
 ```bash
-/plugin-add developer-roadmap
 # Or search in Claude Code plugin marketplace
 ```
 
