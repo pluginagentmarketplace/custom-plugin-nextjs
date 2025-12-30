@@ -1,6 +1,42 @@
 ---
 name: data-ai-skills
 description: Master machine learning, data engineering, AI engineering, LLMs, prompt engineering, and MLOps. Build intelligent systems with Python.
+sasmp_version: "1.3.0"
+skill_type: atomic
+version: "2.0.0"
+
+parameters:
+  domain:
+    type: string
+    enum: [ml, deep-learning, llm, data-engineering, analytics]
+    default: ml
+  framework:
+    type: string
+    enum: [pytorch, tensorflow, sklearn, langchain]
+    default: pytorch
+
+validation_rules:
+  - pattern: "^[a-z_][a-z0-9_]*$"
+    target: function_names
+    message: Use snake_case for Python functions
+  - pattern: ".*\\.py$"
+    target: script_files
+    message: Python files must end with .py
+
+retry_config:
+  max_attempts: 5
+  backoff: exponential
+  initial_delay_ms: 2000
+  max_delay_ms: 60000
+
+logging:
+  on_entry: "[ML] Starting: {task}"
+  on_success: "[ML] Completed: {task} - Metrics: {metrics}"
+  on_error: "[ML] Failed: {task} - {error}"
+
+dependencies:
+  agents:
+    - data-ai-engineer
 ---
 
 # Data & AI Engineering Skills
@@ -10,40 +46,60 @@ description: Master machine learning, data engineering, AI engineering, LLMs, pr
 ```python
 import numpy as np
 import pandas as pd
+from typing import Optional, List
 
-# NumPy arrays
-arr = np.array([1, 2, 3, 4, 5])
-arr_2d = np.zeros((3, 3))
+# NumPy arrays with type hints
+def process_array(arr: np.ndarray) -> np.ndarray:
+    """Process numpy array with validation."""
+    if arr.size == 0:
+        raise ValueError("Empty array not allowed")
+    return np.clip(arr, 0, 1)
 
-# Pandas DataFrames
-df = pd.DataFrame({
-  'name': ['Alice', 'Bob'],
-  'age': [25, 30]
-})
-
-df.describe()
-df[df['age'] > 25]
+# Pandas DataFrames with error handling
+def load_data(path: str) -> pd.DataFrame:
+    """Load data with validation."""
+    try:
+        df = pd.read_csv(path)
+        if df.empty:
+            raise ValueError(f"Empty dataset: {path}")
+        return df
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Data file not found: {path}")
 ```
 
 ## Machine Learning with Scikit-Learn
 
 ```python
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+import logging
 
-# Load and split data
-X_train, X_test, y_train, y_test = train_test_split(
-  X, y, test_size=0.2, random_state=42
-)
+logger = logging.getLogger(__name__)
 
-# Train model
-model = RandomForestClassifier(n_estimators=100)
-model.fit(X_train, y_train)
+def train_model(X, y, n_estimators=100, random_state=42):
+    """Train model with logging and validation."""
+    logger.info(f"Training with {len(X)} samples")
 
-# Evaluate
-predictions = model.predict(X_test)
-accuracy = accuracy_score(y_test, predictions)
+    # Validate input
+    if len(X) != len(y):
+        raise ValueError("X and y must have same length")
+
+    # Split data
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=random_state, stratify=y
+    )
+
+    # Train
+    model = RandomForestClassifier(n_estimators=n_estimators)
+    model.fit(X_train, y_train)
+
+    # Evaluate
+    y_pred = model.predict(X_test)
+    report = classification_report(y_test, y_pred, output_dict=True)
+
+    logger.info(f"Accuracy: {report['accuracy']:.4f}")
+    return model, report
 ```
 
 ## Deep Learning with PyTorch
@@ -51,82 +107,101 @@ accuracy = accuracy_score(y_test, predictions)
 ```python
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 
 class SimpleNet(nn.Module):
-  def __init__(self):
-    super().__init__()
-    self.fc1 = nn.Linear(10, 64)
-    self.fc2 = nn.Linear(64, 1)
-    self.relu = nn.ReLU()
+    def __init__(self, input_dim: int, hidden_dim: int = 64):
+        super().__init__()
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, 1)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(0.2)
 
-  def forward(self, x):
-    x = self.relu(self.fc1(x))
-    return self.fc2(x)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.relu(self.fc1(x))
+        x = self.dropout(x)
+        return torch.sigmoid(self.fc2(x))
 
-model = SimpleNet()
-optimizer = torch.optim.Adam(model.parameters())
-loss_fn = nn.BCELoss()
+def train_epoch(model, dataloader, optimizer, loss_fn, device):
+    """Train one epoch with gradient clipping."""
+    model.train()
+    total_loss = 0
 
-# Training loop
-for epoch in range(100):
-  logits = model(X_train)
-  loss = loss_fn(logits, y_train)
-  loss.backward()
-  optimizer.step()
+    for batch_x, batch_y in dataloader:
+        batch_x, batch_y = batch_x.to(device), batch_y.to(device)
+
+        optimizer.zero_grad()
+        output = model(batch_x)
+        loss = loss_fn(output, batch_y)
+        loss.backward()
+
+        # Gradient clipping
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
+        optimizer.step()
+        total_loss += loss.item()
+
+    return total_loss / len(dataloader)
 ```
 
-## LLM Applications
+## LLM Applications (2025 Best Practices)
 
 ```python
-import openai
+from anthropic import Anthropic
+import backoff
 
-# OpenAI API
-response = openai.ChatCompletion.create(
-  model="gpt-4",
-  messages=[
-    {"role": "system", "content": "You are helpful assistant"},
-    {"role": "user", "content": "Explain machine learning"}
-  ]
-)
+client = Anthropic()
 
-print(response.choices[0].message.content)
+@backoff.on_exception(backoff.expo, Exception, max_tries=3)
+def query_llm(prompt: str, max_tokens: int = 1024) -> str:
+    """Query LLM with retry logic."""
+    message = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=max_tokens,
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return message.content[0].text
+
+# Structured output
+def extract_entities(text: str) -> dict:
+    """Extract entities with validation."""
+    prompt = f"""Extract entities from the text.
+    Return JSON with keys: persons, organizations, locations.
+
+    Text: {text}
+    """
+    response = query_llm(prompt)
+    return json.loads(response)
 ```
 
-## LangChain Framework
+## Data Pipeline with Checkpointing
 
 ```python
-from langchain.llms import OpenAI
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
+import os
+from pathlib import Path
 
-llm = OpenAI(temperature=0.7)
+def process_with_checkpoint(
+    df: pd.DataFrame,
+    checkpoint_dir: str,
+    step_name: str
+) -> pd.DataFrame:
+    """Process with checkpoint recovery."""
+    checkpoint_path = Path(checkpoint_dir) / f"{step_name}.parquet"
 
-template = "Explain {topic} in simple terms."
-prompt = PromptTemplate(template=template, input_variables=["topic"])
+    if checkpoint_path.exists():
+        print(f"Loading checkpoint: {step_name}")
+        return pd.read_parquet(checkpoint_path)
 
-chain = LLMChain(llm=llm, prompt=prompt)
-result = chain.run(topic="Machine Learning")
-```
+    # Process
+    result = expensive_transform(df)
 
-## Data Pipeline with Pandas
+    # Save checkpoint
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    result.to_parquet(checkpoint_path)
 
-```python
-# ETL Pattern
-def load_data(path):
-  return pd.read_csv(path)
-
-def transform_data(df):
-  df['date'] = pd.to_datetime(df['date'])
-  df = df.dropna()
-  return df
-
-def load_to_db(df, connection):
-  df.to_sql('table_name', connection, if_exists='append')
-
-# Usage
-df = load_data('data.csv')
-df = transform_data(df)
-load_to_db(df, conn)
+    return result
 ```
 
 ## MLOps with MLflow
@@ -135,38 +210,78 @@ load_to_db(df, conn)
 import mlflow
 import mlflow.sklearn
 
-mlflow.set_experiment("my-experiment")
+def train_with_tracking(X_train, y_train, X_test, y_test, params):
+    """Train with experiment tracking."""
+    mlflow.set_experiment("model-training")
 
-with mlflow.start_run():
-  mlflow.log_param("n_estimators", 100)
-  model = RandomForestClassifier(n_estimators=100)
-  model.fit(X_train, y_train)
-  accuracy = model.score(X_test, y_test)
-  mlflow.log_metric("accuracy", accuracy)
-  mlflow.sklearn.log_model(model, "model")
+    with mlflow.start_run():
+        # Log parameters
+        mlflow.log_params(params)
+
+        # Train
+        model = RandomForestClassifier(**params)
+        model.fit(X_train, y_train)
+
+        # Evaluate
+        accuracy = model.score(X_test, y_test)
+        mlflow.log_metric("accuracy", accuracy)
+
+        # Log model
+        mlflow.sklearn.log_model(model, "model")
+
+        return model, accuracy
 ```
 
 ## Model Evaluation Metrics
 
-```python
-from sklearn.metrics import (
-  accuracy_score, precision_score, recall_score, f1_score,
-  roc_auc_score, confusion_matrix
-)
+| Task | Primary Metric | Secondary Metrics |
+|------|---------------|-------------------|
+| Classification | Accuracy, F1 | Precision, Recall, AUC |
+| Regression | RMSE, MAE | R², MAPE |
+| Ranking | NDCG | MRR, MAP |
+| Clustering | Silhouette | Davies-Bouldin |
 
-accuracy = accuracy_score(y_test, y_pred)
-precision = precision_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred)
-auc = roc_auc_score(y_test, y_pred_proba)
+## Unit Test Template
+
+```python
+import pytest
+import numpy as np
+from your_module import train_model, process_array
+
+class TestMLFunctions:
+    @pytest.fixture
+    def sample_data(self):
+        X = np.random.randn(100, 10)
+        y = np.random.randint(0, 2, 100)
+        return X, y
+
+    def test_train_model(self, sample_data):
+        X, y = sample_data
+        model, report = train_model(X, y)
+
+        assert model is not None
+        assert 'accuracy' in report
+        assert 0 <= report['accuracy'] <= 1
+
+    def test_process_array_empty(self):
+        with pytest.raises(ValueError, match="Empty array"):
+            process_array(np.array([]))
+
+    def test_process_array_clips(self):
+        arr = np.array([−1, 0.5, 2])
+        result = process_array(arr)
+        assert result.min() >= 0
+        assert result.max() <= 1
 ```
 
-## Time Complexity in ML
+## Troubleshooting Guide
 
-- **Training**: O(n * m) where n=samples, m=features
-- **Prediction**: O(m) per sample
-- **Data Loading**: O(n) full scan
-- **Inference**: Optimize with batching
+| Symptom | Cause | Solution |
+|---------|-------|----------|
+| CUDA OOM | Batch too large | Reduce batch, use gradient accumulation |
+| Loss NaN | Learning rate too high | Reduce LR, add gradient clipping |
+| Overfitting | Model too complex | Add regularization, more data |
+| Slow training | I/O bottleneck | Use DataLoader workers |
 
 ## Key Concepts Checklist
 
@@ -181,10 +296,12 @@ auc = roc_auc_score(y_test, y_pred_proba)
 - [ ] Cross-validation
 - [ ] Handling imbalanced data
 - [ ] Deep learning basics
-- [ ] LLM fine-tuning
+- [ ] LLM integration
 - [ ] Prompt engineering
 - [ ] MLOps pipeline setup
 
 ---
 
 **Source**: https://roadmap.sh
+**Version**: 2.0.0
+**Last Updated**: 2025-01-01

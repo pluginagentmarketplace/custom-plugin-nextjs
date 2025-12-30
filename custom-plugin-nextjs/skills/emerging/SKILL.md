@@ -1,6 +1,41 @@
 ---
 name: emerging-specialty-skills
 description: Master emerging technologies including blockchain, cybersecurity, QA testing, and specialized tech roles. Stay ahead with cutting-edge technologies.
+sasmp_version: "1.3.0"
+skill_type: atomic
+version: "2.0.0"
+
+parameters:
+  domain:
+    type: string
+    enum: [blockchain, security, qa, iot, quantum]
+    default: security
+  context:
+    type: string
+    enum: [learning, implementation, audit]
+    default: implementation
+
+validation_rules:
+  - pattern: "^0x[a-fA-F0-9]{40}$"
+    target: ethereum_addresses
+    message: Must be valid Ethereum address
+  - pattern: "^test_.*$"
+    target: test_functions
+    message: Test functions must start with test_
+
+retry_config:
+  max_attempts: 3
+  backoff: exponential
+  initial_delay_ms: 1000
+
+logging:
+  on_entry: "[Emerging] Starting: {task}"
+  on_success: "[Emerging] Completed: {task}"
+  on_error: "[Emerging] Failed: {task} - {error}"
+
+dependencies:
+  agents:
+    - emerging-tech-specialist
 ---
 
 # Emerging Tech & Specialty Skills
@@ -8,242 +43,301 @@ description: Master emerging technologies including blockchain, cybersecurity, Q
 ## Blockchain & Smart Contracts
 
 ```solidity
-// Solidity - Ethereum smart contracts
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-contract SimpleToken {
-  mapping(address => uint256) public balances;
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-  constructor() {
-    balances[msg.sender] = 1000000;
-  }
+contract SecureToken is ReentrancyGuard, Ownable {
+    mapping(address => uint256) public balances;
+    bool public paused;
 
-  function transfer(address to, uint256 amount) public {
-    require(balances[msg.sender] >= amount, "Insufficient balance");
-    balances[msg.sender] -= amount;
-    balances[to] += amount;
-  }
+    event Transfer(address indexed from, address indexed to, uint256 amount);
+    event Paused(address account);
+
+    modifier whenNotPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
+    constructor() Ownable(msg.sender) {
+        balances[msg.sender] = 1000000 * 10**18;
+    }
+
+    // Checks-Effects-Interactions pattern
+    function transfer(address to, uint256 amount)
+        external
+        nonReentrant
+        whenNotPaused
+    {
+        // Checks
+        require(to != address(0), "Invalid address");
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+
+        // Effects
+        balances[msg.sender] -= amount;
+        balances[to] += amount;
+
+        // Interactions (none in this case, but would go here)
+        emit Transfer(msg.sender, to, amount);
+    }
+
+    function pause() external onlyOwner {
+        paused = true;
+        emit Paused(msg.sender);
+    }
 }
 ```
 
 ```javascript
-// Web3.js - Interact with blockchain
-const Web3 = require('web3');
-const web3 = new Web3('https://mainnet.infura.io/v3/YOUR-API-KEY');
+// Ethers.js v6 - Interact with blockchain
+import { ethers } from 'ethers';
 
-// Get balance
-const balance = await web3.eth.getBalance('0x...');
-console.log(web3.utils.fromWei(balance, 'ether'));
+async function interactWithContract() {
+  const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
-// Deploy contract
-const contract = new web3.eth.Contract(ABI);
-const deployed = await contract.deploy({data: BYTECODE})
-  .send({from: userAddress, gas: 3000000});
+  const contract = new ethers.Contract(
+    CONTRACT_ADDRESS,
+    ABI,
+    wallet
+  );
+
+  try {
+    // Estimate gas first
+    const gasEstimate = await contract.transfer.estimateGas(
+      recipientAddress,
+      amount
+    );
+
+    // Send transaction with buffer
+    const tx = await contract.transfer(recipientAddress, amount, {
+      gasLimit: gasEstimate * 120n / 100n  // 20% buffer
+    });
+
+    const receipt = await tx.wait();
+    console.log(`TX confirmed: ${receipt.hash}`);
+  } catch (error) {
+    console.error('Transaction failed:', error.message);
+  }
+}
 ```
 
-## Cybersecurity Fundamentals
+## Cybersecurity Best Practices
 
-```bash
-# Kali Linux tools
-nmap -sV -A 192.168.1.1          # Network scanning
-burpsuite                          # Web vulnerability testing
-metasploit                         # Exploitation framework
-wireshark                          # Packet analysis
-john                               # Password cracking
+```python
+# Security scanning with bandit
+# bandit -r src/ -f json -o security-report.json
 
-# OWASP Testing
-- SQL Injection
-- Cross-Site Scripting (XSS)
-- Cross-Site Request Forgery (CSRF)
-- Broken Authentication
-- Sensitive Data Exposure
+# Secure password hashing
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
+ph = PasswordHasher(
+    time_cost=3,
+    memory_cost=65536,
+    parallelism=4
+)
+
+def hash_password(password: str) -> str:
+    """Hash password with Argon2id."""
+    return ph.hash(password)
+
+def verify_password(hash: str, password: str) -> bool:
+    """Verify password against hash."""
+    try:
+        ph.verify(hash, password)
+        return True
+    except VerifyMismatchError:
+        return False
+
+# Input validation
+import re
+from html import escape
+
+def sanitize_input(user_input: str) -> str:
+    """Sanitize user input to prevent XSS."""
+    # Remove script tags
+    cleaned = re.sub(r'<script.*?>.*?</script>', '', user_input, flags=re.DOTALL)
+    # Escape HTML entities
+    return escape(cleaned)
+
+def validate_email(email: str) -> bool:
+    """Validate email format."""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
 ```
 
-## QA & Testing
+## QA & Testing Framework
 
 ```javascript
-// Unit Testing with Jest
-test('addition equals 3', () => {
-  expect(1 + 2).toBe(3);
-});
+// Jest with comprehensive testing patterns
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-// React Component Testing
-test('button click increments counter', () => {
-  render(<Counter />);
-  fireEvent.click(screen.getByRole('button'));
-  expect(screen.getByText(/Count: 1/)).toBeInTheDocument();
-});
+describe('Authentication Flow', () => {
+  // Setup and teardown
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+  });
 
-// E2E Testing with Cypress
-describe('Login flow', () => {
-  it('should login successfully', () => {
-    cy.visit('/login');
-    cy.get('[name="email"]').type('user@example.com');
-    cy.get('[name="password"]').type('password');
-    cy.get('button[type="submit"]').click();
-    cy.url().should('include', '/dashboard');
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  // Happy path
+  test('successful login redirects to dashboard', async () => {
+    const mockLogin = jest.fn().mockResolvedValue({ token: 'abc123' });
+
+    render(<LoginForm onLogin={mockLogin} />);
+
+    await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'securepass');
+    await userEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    await waitFor(() => {
+      expect(mockLogin).toHaveBeenCalledWith({
+        email: 'user@example.com',
+        password: 'securepass'
+      });
+    });
+  });
+
+  // Error handling
+  test('displays error on invalid credentials', async () => {
+    const mockLogin = jest.fn().mockRejectedValue(new Error('Invalid credentials'));
+
+    render(<LoginForm onLogin={mockLogin} />);
+
+    await userEvent.type(screen.getByLabelText(/email/i), 'bad@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'wrongpass');
+    await userEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/invalid credentials/i);
+    });
+  });
+
+  // Edge cases
+  test('prevents submission with empty fields', async () => {
+    const mockLogin = jest.fn();
+
+    render(<LoginForm onLogin={mockLogin} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    expect(mockLogin).not.toHaveBeenCalled();
+    expect(screen.getByText(/email is required/i)).toBeInTheDocument();
   });
 });
 ```
 
-## Kotlin Programming
+```javascript
+// Cypress E2E with best practices
+describe('E-commerce Checkout', () => {
+  beforeEach(() => {
+    cy.intercept('GET', '/api/cart', { fixture: 'cart.json' }).as('getCart');
+    cy.intercept('POST', '/api/checkout', { fixture: 'order.json' }).as('checkout');
 
-```kotlin
-// Kotlin Basics
-fun main() {
-  val name = "Alice"  // Immutable
-  var age = 30        // Mutable
+    cy.login('test@example.com', 'password');  // Custom command
+    cy.visit('/checkout');
+    cy.wait('@getCart');
+  });
 
-  println("Name: $name, Age: $age")
-}
+  it('completes checkout successfully', () => {
+    // Fill shipping info
+    cy.get('[data-testid="shipping-form"]').within(() => {
+      cy.get('input[name="address"]').type('123 Main St');
+      cy.get('input[name="city"]').type('New York');
+      cy.get('select[name="state"]').select('NY');
+      cy.get('input[name="zip"]').type('10001');
+    });
 
-// Extension Functions
-fun String.isValidEmail() =
-  this.contains("@") && this.contains(".")
+    // Fill payment info
+    cy.get('[data-testid="payment-form"]').within(() => {
+      cy.get('input[name="card"]').type('4242424242424242');
+      cy.get('input[name="expiry"]').type('12/25');
+      cy.get('input[name="cvv"]').type('123');
+    });
 
-// Higher-Order Functions
-val numbers = listOf(1, 2, 3, 4, 5)
-numbers
-  .filter { it > 2 }
-  .map { it * 2 }
-  .forEach { println(it) }
+    // Submit and verify
+    cy.get('[data-testid="submit-order"]').click();
+    cy.wait('@checkout');
 
-// Coroutines
-launch {
-  val result = withContext(Dispatchers.IO) {
-    fetchData()
-  }
-  updateUI(result)
-}
+    cy.url().should('include', '/order-confirmation');
+    cy.get('[data-testid="order-number"]').should('exist');
+  });
+});
 ```
 
-## QA Best Practices
+## Security Testing Checklist
 
-```
-Test Pyramid:
-- Unit Tests (70%): Fast, isolated
-- Integration Tests (20%): Component interaction
-- E2E Tests (10%): Full user workflow
+```yaml
+# OWASP Top 10 Testing Checklist
+security_tests:
+  injection:
+    - SQL injection in all inputs
+    - NoSQL injection
+    - Command injection
+    - LDAP injection
+    status: [ ]
 
-Testing Types:
-- Functional: Does it work?
-- Performance: How fast?
-- Security: Is it safe?
-- Usability: Is it easy?
-- Compatibility: Works everywhere?
-```
+  authentication:
+    - Password policy enforcement
+    - Account lockout mechanism
+    - Session management
+    - MFA implementation
+    status: [ ]
 
-## Emerging Technologies to Watch
+  sensitive_data:
+    - Data encrypted at rest
+    - Data encrypted in transit (TLS 1.3)
+    - No sensitive data in logs
+    - Secure key management
+    status: [ ]
 
-```
-1. Web3 & Blockchain
-   - Smart contracts
-   - DeFi protocols
-   - NFT platforms
-   - DAO governance
+  access_control:
+    - RBAC implementation
+    - Privilege escalation tests
+    - IDOR vulnerabilities
+    - Path traversal
+    status: [ ]
 
-2. AI & Machine Learning
-   - Large language models
-   - Generative AI
-   - Edge AI
-   - Federated learning
-
-3. Quantum Computing
-   - Quantum algorithms
-   - Quantum cryptography
-   - Quantum simulation
-
-4. IoT & Edge Computing
-   - Embedded systems
-   - Edge AI
-   - 5G applications
-   - Sensor networks
-
-5. Extended Reality (XR)
-   - Virtual Reality (VR)
-   - Augmented Reality (AR)
-   - Mixed Reality (MR)
+  security_headers:
+    - Content-Security-Policy
+    - X-Frame-Options
+    - X-Content-Type-Options
+    - Strict-Transport-Security
+    status: [ ]
 ```
 
-## Security Best Practices
+## Test Pyramid
 
 ```
-OWASP Top 10 Prevention:
-
-1. Input Validation
-   - Sanitize all inputs
-   - Use parameterized queries
-
-2. Authentication
-   - Strong passwords
-   - Multi-factor authentication
-   - Session management
-
-3. Data Protection
-   - Encrypt sensitive data
-   - Use HTTPS/TLS
-   - Secure storage
-
-4. Access Control
-   - Principle of least privilege
-   - Role-based access (RBAC)
-   - Regular audit logs
-
-5. Security Headers
-   - Content-Security-Policy
-   - X-Frame-Options
-   - X-Content-Type-Options
+        /\
+       /  \        E2E Tests (10%)
+      /    \       - Full user flows
+     /------\      - Browser automation
+    /        \
+   /          \    Integration Tests (20%)
+  /            \   - API contracts
+ /--------------\  - Service integration
+/                \
+/                  \ Unit Tests (70%)
+/--------------------\ - Fast, isolated
+                       - Mock dependencies
 ```
 
-## Specialized Career Paths
+## Troubleshooting Guide
 
-```
-Product Manager:
-- Product strategy
-- OKRs and metrics
-- User research
-- Roadmap planning
-
-Engineering Manager:
-- Team leadership
-- Technical decisions
-- Performance management
-- Mentorship
-
-DevRel:
-- Community building
-- Content creation
-- Developer advocacy
-- Technical speaking
-
-Technical Writer:
-- Documentation
-- API docs
-- Tutorials
-- Technical communication
-
-QA Engineer:
-- Test automation
-- Test planning
-- Bug reporting
-- Quality metrics
-```
-
-## Performance Testing
-
-```bash
-# Load testing with Apache JMeter
-- Create test plan
-- Add HTTP requests
-- Configure thread groups
-- Run and analyze results
-
-# Stress testing tools
-- Artillery: Load testing
-- Locust: Python-based
-- k6: Modern load testing
-- Gatling: JVM-based
-```
+| Symptom | Cause | Solution |
+|---------|-------|----------|
+| Reentrancy exploit | No guard | Use ReentrancyGuard |
+| Gas too high | Inefficient code | Optimize loops, storage |
+| Test flaky | Async issues | Add proper waits |
+| False positive | Scanner too sensitive | Tune rules |
 
 ## Key Concepts Checklist
 
@@ -263,3 +357,5 @@ QA Engineer:
 ---
 
 **Source**: https://roadmap.sh
+**Version**: 2.0.0
+**Last Updated**: 2025-01-01
