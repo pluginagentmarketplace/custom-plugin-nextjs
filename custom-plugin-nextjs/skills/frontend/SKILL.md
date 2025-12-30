@@ -1,6 +1,40 @@
 ---
 name: frontend-skills
 description: Master HTML5, CSS3, JavaScript ES6+, React, Vue, Angular, and modern web development. Learn responsive design, accessibility, and web performance optimization.
+sasmp_version: "1.3.0"
+skill_type: atomic
+version: "2.0.0"
+
+parameters:
+  framework:
+    type: string
+    enum: [react, vue, angular, vanilla]
+    default: react
+  typescript:
+    type: boolean
+    default: true
+
+validation_rules:
+  - pattern: "^[a-z][a-zA-Z0-9]*$"
+    target: component_names
+    message: Component names must be PascalCase
+  - pattern: "^use[A-Z]"
+    target: hook_names
+    message: Custom hooks must start with 'use'
+
+retry_config:
+  max_attempts: 3
+  backoff: exponential
+  initial_delay_ms: 1000
+
+logging:
+  on_entry: "Starting frontend task: {task}"
+  on_success: "Completed: {task}"
+  on_error: "Failed: {task} - {error}"
+
+dependencies:
+  agents:
+    - frontend-ui-developer
 ---
 
 # Frontend Development Skills
@@ -56,10 +90,16 @@ const add = (a, b) => a + b;
 const {name, age} = user;
 const [first, ...rest] = array;
 
-// Async/await
+// Async/await with error handling
 async function fetchData() {
-  const data = await fetch('/api/data');
-  return data.json();
+  try {
+    const response = await fetch('/api/data');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('Fetch failed:', error);
+    throw error;
+  }
 }
 
 // Array methods
@@ -71,32 +111,48 @@ arr.map(x => x * 2)
 ## React Hooks Pattern
 
 ```jsx
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 
 function Counter() {
   const [count, setCount] = useState(0);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     document.title = `Count: ${count}`;
   }, [count]);
 
-  return <button onClick={() => setCount(count + 1)}>
-    Count: {count}
-  </button>;
+  const increment = useCallback(() => {
+    setCount(prev => prev + 1);
+  }, []);
+
+  if (error) return <ErrorBoundary error={error} />;
+
+  return (
+    <button onClick={increment}>
+      Count: {count}
+    </button>
+  );
 }
 ```
 
 ## State Management
 
 ```javascript
-// Context API
-const UserContext = createContext();
-<UserContext.Provider value={{user, setUser}}>
-  <App />
-</UserContext.Provider>
+// Context API with TypeScript
+interface UserContextType {
+  user: User | null;
+  setUser: (user: User) => void;
+}
 
-// useContext hook
-const {user} = useContext(UserContext);
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+export function useUser() {
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('useUser must be within UserProvider');
+  }
+  return context;
+}
 ```
 
 ## Performance Optimization
@@ -109,7 +165,7 @@ const LazyComponent = lazy(() => import('./Component'));
 const MemoizedComponent = memo(Component);
 const value = useMemo(() => expensiveComputation(), [deps]);
 
-// useCallback
+// useCallback for stable references
 const handleClick = useCallback(() => {
   // handler
 }, [dependencies]);
@@ -117,10 +173,13 @@ const handleClick = useCallback(() => {
 
 ## Web Performance Metrics
 
-- **LCP** (Largest Contentful Paint) < 2.5s
-- **FID** (First Input Delay) < 100ms
-- **CLS** (Cumulative Layout Shift) < 0.1
-- **TTL** (Time to Interactive) < 5s
+| Metric | Target | Description |
+|--------|--------|-------------|
+| LCP | < 2.5s | Largest Contentful Paint |
+| FID | < 100ms | First Input Delay |
+| CLS | < 0.1 | Cumulative Layout Shift |
+| TTI | < 5s | Time to Interactive |
+| FCP | < 1.8s | First Contentful Paint |
 
 ## Accessibility Standards
 
@@ -130,16 +189,44 @@ const handleClick = useCallback(() => {
 - **Color contrast** ratios (4.5:1 minimum)
 - **Semantic HTML** structure
 
-## Testing Patterns
+## Unit Test Template
 
 ```javascript
-// Unit test with Jest
-test('Counter increments', () => {
-  render(<Counter />);
-  fireEvent.click(screen.getByRole('button'));
-  expect(screen.getByText(/Count: 1/)).toBeInTheDocument();
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+describe('Counter Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('increments count on click', async () => {
+    render(<Counter />);
+
+    const button = screen.getByRole('button');
+    await userEvent.click(button);
+
+    expect(screen.getByText(/Count: 1/)).toBeInTheDocument();
+  });
+
+  test('handles error state', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(<Counter initialError={new Error('Test')} />);
+
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
 });
 ```
+
+## Troubleshooting Guide
+
+| Symptom | Cause | Solution |
+|---------|-------|----------|
+| Component not updating | Stale closure | Use functional setState |
+| Infinite re-render | useEffect missing deps | Add all dependencies |
+| Memory leak warning | Unmounted state update | Use cleanup function |
+| Hydration mismatch | Server/client diff | Use useEffect for client-only |
 
 ## Key Concepts Checklist
 
@@ -162,3 +249,5 @@ test('Counter increments', () => {
 ---
 
 **Source**: https://roadmap.sh
+**Version**: 2.0.0
+**Last Updated**: 2025-01-01
